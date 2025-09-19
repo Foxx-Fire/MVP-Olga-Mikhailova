@@ -12,17 +12,18 @@ final class SearchViewController: BaseViewController {
     
     // MARK: - Lifecycle
     
-    override func loadView() {
-        view = searchView
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupView()
         setupNavigation()
     }
     
     // MARK: - Setup Methods
+    
+    private func setupView() {
+        view = searchView
+    }
     
     private func setupNavigation() {
         configureNavigation(title: Constants.Navigation.title)
