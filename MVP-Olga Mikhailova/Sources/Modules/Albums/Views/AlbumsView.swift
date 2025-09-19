@@ -58,6 +58,10 @@ final class AlbumsView: UIView {
     
     //MARK: - Public methods
     
+    func reloadData() {
+        collectionView.reloadData()
+    }
+    
     func setupDataSource(dataSource: UICollectionViewDataSource) {
         collectionView.dataSource = dataSource
     }

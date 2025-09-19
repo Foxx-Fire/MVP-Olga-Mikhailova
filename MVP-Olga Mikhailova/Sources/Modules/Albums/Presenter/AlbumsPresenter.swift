@@ -5,6 +5,8 @@
 //  Created by FoxxFire on 18.09.2025.
 //
 
+import Foundation
+
 /*
  MVP (Model-View-Presenter)
  Роли:
@@ -31,3 +33,88 @@
  
  Ключевой момент: Связи между View и Model нет. Весь поток данных контролируется Presenterом.
  */
+
+protocol AlbumsViewProtocol: AnyObject {
+    func reloadData()
+}
+
+protocol AlbumsPresenterProtocol: AnyObject {
+    func numberOfSections() -> Int
+    func numberOfItems(in section: Int) -> Int
+    func item(at indexPath: IndexPath) -> CellItemProtocol?
+    func didSelectItem(at indexPath: IndexPath)
+    func headerTitle(for section: Int) -> String?
+    func headerButtonTitle(for section: Int) -> String?
+    func didTapHeaderButton(in section: Int)
+    func layoutType(for section: Int) -> AlbumCompositionalLayout.LayoutType?
+}
+
+final class AlbumsPresenter: AlbumsPresenterProtocol {
+    
+    // MARK: - Properties
+    weak var view: AlbumsViewProtocol?
+    private let dataService: AlbumsDataServiceProtocol
+    
+    // MARK: - Init
+    init(dataService: AlbumsDataServiceProtocol) {
+        self.dataService = dataService
+    }
+    
+    // Бизнес-логика из контроллера
+    func numberOfSections() -> Int {
+        return dataService.getAllSections().count
+    }
+    
+    func numberOfItems(in section: Int) -> Int {
+        guard let section = dataService.getSection(at: section) else { return 0 }
+        return section.items.count
+    }
+    
+    func item(at indexPath: IndexPath) -> CellItemProtocol? {
+        guard let section = dataService.getSection(at: indexPath.section),
+              indexPath.item < section.items.count else {
+            return nil
+        }
+        return section.items[indexPath.item]
+    }
+    
+    func headerTitle(for section: Int) -> String? {
+        guard let section = dataService.getSection(at: section) else { return nil }
+        return section.header.title
+    }
+    
+    func headerButtonTitle(for section: Int) -> String? {
+        guard let section = dataService.getSection(at: section) else { return nil }
+        return section.header.buttonTitle
+    }
+    
+    func layoutType(for section: Int) -> AlbumCompositionalLayout.LayoutType? {
+        guard let sectionType = dataService.getSectionType(at: section) else {
+            return nil
+        }
+        
+        switch sectionType {
+        case .myAlbums: return .columns
+        case .sharedAlbums: return .plain
+        case .mediaTypes, .other: return .tableStyle
+        }
+    }
+    
+    func didSelectItem(at indexPath: IndexPath) {
+        guard let item = item(at: indexPath) else { return }
+        print("Selected item: \(item.itemId)")
+    }
+    
+    func didTapHeaderButton(in section: Int) {
+        guard let sectionType = dataService.getSectionType(at: section) else {
+            return
+        }
+        
+        switch sectionType {
+        case .myAlbums: print("See All tapped for My Albums")
+        case .sharedAlbums: print("See All tapped for Shared Albums")
+        case .mediaTypes, .other: print("Button tapped for section: \(sectionType.rawValue)")
+        }
+    }
+}
+
