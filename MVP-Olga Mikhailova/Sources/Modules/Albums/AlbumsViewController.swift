@@ -10,11 +10,11 @@ final class AlbumsViewController: BaseViewController {
     
     // MARK: - Properties
     
-    private let dataService: AlbumsDataServiceProtocol
+    private let presenter: AlbumsPresenterProtocol
     
     private lazy var albumsView: AlbumsView = {
         let view = AlbumsView { [weak self] sectionIndex in
-            return self?.getLayoutType(for: sectionIndex)
+            self?.presenter.layoutType(for: sectionIndex)
         }
         view.setupDataSource(dataSource: self)
         view.setupDelegate(delegate: self)
@@ -22,8 +22,8 @@ final class AlbumsViewController: BaseViewController {
     }()
     
     //MARK: - Init
-    init(dataService: AlbumsDataServiceProtocol) {
-        self.dataService = dataService
+    init(presenter: AlbumsPresenterProtocol) {
+        self.presenter = presenter
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -44,7 +44,9 @@ final class AlbumsViewController: BaseViewController {
         setupNavigation()
     }
     
-    func setupNavigation() {
+    //MARK: - private methods
+    
+    private func setupNavigation() {
         let addAction = UIAction { _ in
             print("Add button tapped in Albums")
         }
@@ -56,38 +58,6 @@ final class AlbumsViewController: BaseViewController {
             buttonAction: addAction
         )
     }
-    
-    //MARK: - private methods
-    /*
-     Не переносите getLayoutType во View! Он должен остаться в контроллере, потому что:
-     
-     ✅ Использует dataService (логика данных)
-     
-     ✅ Принимает решения на основе данных
-     
-     ✅ Относится к бизнес-логике
-     
-     ✅ Не имеет отношения к отрисовке
-     
-     Текущая архитектура правильная!
-     
-     AI тоже против как и я
-     */
-    
-    private func getLayoutType(for sectionIndex: Int) -> AlbumCompositionalLayout.LayoutType? {
-        guard let sectionType = dataService.getSectionType(at: sectionIndex) else {
-            return nil
-        }
-        
-        switch sectionType {
-        case .myAlbums:
-            return .columns
-        case .sharedAlbums:
-            return .plain
-        case .mediaTypes, .other:
-            return .tableStyle
-        }
-    }
 }
 
 // MARK: - Constants
@@ -98,7 +68,15 @@ extension AlbumsViewController {
             static let buttonImageName = "plus"
         }
         
-        static let backgroundColor: UIColor = .white
+        //   static let backgroundColor: UIColor = .white
+    }
+}
+
+// MARK: - AlbumsViewProtocol
+
+extension AlbumsViewController: AlbumsViewProtocol {
+    func reloadData() {
+        albumsView.reloadData()
     }
 }
 
@@ -114,22 +92,22 @@ extension AlbumsViewController: UICollectionViewDelegate {
 // MARK: - UICollectionViewDataSource
 
 extension AlbumsViewController: UICollectionViewDataSource {
+    
     // Определяет количество секций в коллекции
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return dataService.getAllSections().count
+        return presenter.numberOfSections()
     }
     
     // Определяет количество ячеек в конкретной секции
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        guard let albumSection = dataService.getSection(at: section) else { return 0 }
-        return albumSection.items.count
+        return presenter.numberOfItems(in: section)
     }
     
     // Создает и настраивает ячейку для конкретной позиции
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        guard let item = dataService.getSection(at: indexPath.section)?.items[indexPath.item] else {
+        guard let item = presenter.item(at: indexPath) else {
             return UICollectionViewCell()
         }
         
@@ -188,10 +166,6 @@ extension AlbumsViewController: UICollectionViewDataSource {
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
         
-        guard let albumSection = dataService.getSection(at: indexPath.section) else {
-            return UICollectionReusableView()
-        }
-        
         guard let header = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
             withReuseIdentifier: AlbumsHeaderView.identifier,
@@ -201,29 +175,14 @@ extension AlbumsViewController: UICollectionViewDataSource {
         }
         
         header.configure(
-            title: albumSection.header.title,
-            buttonTitle: albumSection.header.buttonTitle,
+            title: presenter.headerTitle(for: indexPath.section) ?? "",
+            buttonTitle: presenter.headerButtonTitle(for: indexPath.section),
             buttonAction: { [weak self] in
-                self?.handleHeaderButtonTap(for: indexPath.section)
+                self?.presenter.didTapHeaderButton(in: indexPath.section)
             }
         )
         
         return header
-    }
-    
-    private func handleHeaderButtonTap(for sectionIndex: Int) {
-        guard let sectionType = dataService.getSectionType(
-            at: sectionIndex
-        ) else { return }
-        
-        switch sectionType {
-        case .myAlbums:
-            print("See All tapped for My Albums")
-        case .sharedAlbums:
-            print("See All tapped for Shared Albums")
-        case .mediaTypes, .other:
-            print("Button tapped for section: \(sectionType.rawValue)")
-        }
     }
 }
 
