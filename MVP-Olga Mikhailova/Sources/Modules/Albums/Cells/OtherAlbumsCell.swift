@@ -144,5 +144,3 @@ private extension OtherAlbumsCell {
         static let countFont: UIFont = .systemFont(ofSize: 16)
     }
 }
-
-

@@ -34,11 +34,13 @@ import Foundation
  Ключевой момент: Связи между View и Model нет. Весь поток данных контролируется Presenterом.
  */
 
-protocol AlbumsViewProtocol: AnyObject {
+// то, что View умеет принимать от презентера (обновить экран и т.п.)
+protocol AlbumsViewInput: AnyObject {
     func reloadData()
 }
 
-protocol AlbumsPresenterProtocol: AnyObject {
+// то, что View делегирует презентеру (вопросы про данные, события UI)
+protocol AlbumsViewOutput: AnyObject {
     func numberOfSections() -> Int
     func numberOfItems(in section: Int) -> Int
     func item(at indexPath: IndexPath) -> CellItemProtocol?
@@ -49,10 +51,10 @@ protocol AlbumsPresenterProtocol: AnyObject {
     func layoutType(for section: Int) -> AlbumCompositionalLayout.LayoutType?
 }
 
-final class AlbumsPresenter: AlbumsPresenterProtocol {
+final class AlbumsPresenter: AlbumsViewOutput {
     
     // MARK: - Properties
-    weak var view: AlbumsViewProtocol?
+    weak var view: AlbumsViewInput?
     private let dataService: AlbumsDataServiceProtocol
     
     // MARK: - Init
