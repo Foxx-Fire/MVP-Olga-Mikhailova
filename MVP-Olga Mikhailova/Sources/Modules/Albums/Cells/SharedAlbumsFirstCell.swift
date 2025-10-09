@@ -237,5 +237,3 @@ extension SharedAlbumsFirstCell {
         static let placeholderSystemImageName = "person.circle.fill"
     }
 }
-
-

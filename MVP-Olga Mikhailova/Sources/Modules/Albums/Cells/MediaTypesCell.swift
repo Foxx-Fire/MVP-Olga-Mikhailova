@@ -146,4 +146,3 @@ private extension MediaTypesCell {
         static let countFont: UIFont = .systemFont(ofSize: 16)
     }
 }
-

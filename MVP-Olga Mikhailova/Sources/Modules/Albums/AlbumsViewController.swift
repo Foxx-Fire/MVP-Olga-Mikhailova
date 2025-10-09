@@ -10,7 +10,7 @@ final class AlbumsViewController: BaseViewController {
     
     // MARK: - Properties
     
-    private let presenter: AlbumsPresenterProtocol
+    private let presenter: AlbumsViewOutput
     
     private lazy var albumsView: AlbumsView = {
         let view = AlbumsView { [weak self] sectionIndex in
@@ -22,7 +22,7 @@ final class AlbumsViewController: BaseViewController {
     }()
     
     //MARK: - Init
-    init(presenter: AlbumsPresenterProtocol) {
+    init(presenter: AlbumsViewOutput) {
         self.presenter = presenter
         
         super.init(nibName: nil, bundle: nil)
@@ -74,7 +74,7 @@ extension AlbumsViewController {
 
 // MARK: - AlbumsViewProtocol
 
-extension AlbumsViewController: AlbumsViewProtocol {
+extension AlbumsViewController: AlbumsViewInput {
     func reloadData() {
         albumsView.reloadData()
     }
@@ -185,9 +185,3 @@ extension AlbumsViewController: UICollectionViewDataSource {
         return header
     }
 }
-
-
-
-
-
-

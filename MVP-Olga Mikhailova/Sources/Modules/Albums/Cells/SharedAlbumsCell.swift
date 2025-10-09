@@ -133,5 +133,3 @@ extension SharedAlbumsCell {
         static let placeholderSystemImageName = "photo.on.rectangle"
     }
 }
-
-
