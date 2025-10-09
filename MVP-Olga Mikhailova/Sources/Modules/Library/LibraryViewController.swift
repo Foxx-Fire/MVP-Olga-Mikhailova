@@ -12,17 +12,18 @@ final class LibraryViewController: BaseViewController {
     
     // MARK: - Lifecycle
     
-    override func loadView() {
-        view = libraryView
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupView()
         setupNavigation()
     }
     
     // MARK: - Setups
+    
+    private func setupView() {
+        view = libraryView
+    }
     
     func setupNavigation() {
         configureNavigation(title: Constants.Navigation.title)

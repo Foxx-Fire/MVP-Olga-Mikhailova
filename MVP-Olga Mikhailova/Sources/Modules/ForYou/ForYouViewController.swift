@@ -12,17 +12,18 @@ final class ForYouViewController: BaseViewController {
     
     // MARK: - Lifecycle
     
-    override func loadView() {
-        view = forYouView
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupView()
         setupNavigation()
     }
     
     // MARK: - Setup Methods
+    
+    private func setupView() {
+        view = forYouView
+    }
     
     func setupNavigation() {
         configureNavigation(title: Constants.Navigation.title)
